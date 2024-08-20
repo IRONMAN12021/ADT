@@ -1,10 +1,12 @@
 import random
 
 class TicTacToe:
-    def __init__(self, difficulty='Easy', game_count=0):
+    def __init__(self, difficulty='Easy', game_count=0, player_score=0, ai_score=0):
         self.board = self.initialize_board()
         self.difficulty = difficulty
         self.game_count = game_count
+        self.player_score = player_score
+        self.ai_score = ai_score
         self.current_player = 'X' if game_count % 2 == 0 else 'O'  # Alternates starting player
 
     # Initialize the board
@@ -140,10 +142,12 @@ def select_difficulty():
 # Main game loop
 def play_game():
     game_count = 0
+    player_score = 0
+    ai_score = 0
     difficulty = select_difficulty()
 
     while True:
-        game = TicTacToe(difficulty, game_count)
+        game = TicTacToe(difficulty, game_count, player_score, ai_score)
         while True:
             game.print_board()
 
@@ -153,6 +157,7 @@ def play_game():
                     if game.check_winner('X'):
                         game.print_board()
                         print("Congratulations! You win!")
+                        player_score += 1  # Increment player score
                         break
                     game.switch_player()
                 else:
@@ -163,6 +168,7 @@ def play_game():
                 if game.check_winner('O'):
                     game.print_board()
                     print("AI wins!")
+                    ai_score += 1  # Increment AI score
                     break
                 game.switch_player()
 
@@ -171,10 +177,17 @@ def play_game():
                 print("It's a draw!")
                 break
 
+        # Display updated scores
+        print(f"Score -> You: {player_score} | AI: {ai_score}")
+
         game_count += 1
         play_again = input("Do you want to play again? (y/n): ")
         if play_again.lower() != 'y':
             break
+
+    # Show final scores
+    print(f"Final Score -> You: {player_score} | AI: {ai_score}")
+    print("Thank you for playing!")
 
 if __name__ == "__main__":
     play_game()
