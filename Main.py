@@ -1,125 +1,104 @@
 import random
 
-class TicTacToe:
-    def __init__(self, difficulty='Easy', game_count=0, player_score=0, ai_score=0):
-        self.board = self.initialize_board()
-        self.difficulty = difficulty
-        self.game_count = game_count
-        self.player_score = player_score
-        self.ai_score = ai_score
-        self.current_player = 'X' if game_count % 2 == 0 else 'O'  # Alternates starting player
+# Initialize the board
+def initialize_board():
+    return [' ' for _ in range(9)]
 
-    # Initialize the board
-    def initialize_board(self):
-        return [' ' for _ in range(9)]
+# Print the board
+def print_board(board):
+    print("Current Board:")
+    print(f" {board[0]} | {board[1]} | {board[2]}")
+    print("---|---|---")
+    print(f" {board[3]} | {board[4]} | {board[5]}")
+    print("---|---|---")
+    print(f" {board[6]} | {board[7]} | {board[8]}")
 
-    # Print the board
-    def print_board(self):
-        board = self.board
-        print(f"{board[0]} | {board[1]} | {board[2]}")
-        print("--|---|--")
-        print(f"{board[3]} | {board[4]} | {board[5]}")
-        print("--|---|--")
-        print(f"{board[6]} | {board[7]} | {board[8]}")
-
-    # Check for a win
-    def check_winner(self, player):
-        win_patterns = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Horizontal
-            [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Vertical
-            [0, 4, 8], [2, 4, 6]              # Diagonal
-        ]
-        for pattern in win_patterns:
-            if all(self.board[i] == player for i in pattern):
-                return True
-        return False
-
-    # Check for a draw
-    def check_draw(self):
-        return all(cell != ' ' for cell in self.board)
-
-    # Get available moves
-    def available_moves(self):
-        return [i for i, cell in enumerate(self.board) if cell == ' ']
-
-    # Easy AI move (random)
-    def easy_ai_move(self):
-        return random.choice(self.available_moves())
-
-    # Medium AI move (block player's win)
-    def medium_ai_move(self):
-        for move in self.available_moves():
-            self.board[move] = 'O'
-            if self.check_winner('O'):
-                self.board[move] = ' '
-                return move
-            self.board[move] = ' '
-        for move in self.available_moves():
-            self.board[move] = 'X'
-            if self.check_winner('X'):
-                self.board[move] = ' '
-                return move
-            self.board[move] = ' '
-        return self.easy_ai_move()
-
-    # Hard AI move (minimax algorithm)
-    def minimax(self, depth, is_maximizing):
-        if self.check_winner('O'):
-            return 10 - depth
-        if self.check_winner('X'):
-            return depth - 10
-        if self.check_draw():
-            return 0
-
-        if is_maximizing:
-            best_score = -float('inf')
-            for move in self.available_moves():
-                self.board[move] = 'O'
-                score = self.minimax(depth + 1, False)
-                self.board[move] = ' '
-                best_score = max(score, best_score)
-            return best_score
-        else:
-            best_score = float('inf')
-            for move in self.available_moves():
-                self.board[move] = 'X'
-                score = self.minimax(depth + 1, True)
-                self.board[move] = ' '
-                best_score = min(score, best_score)
-            return best_score
-
-    def hard_ai_move(self):
-        best_move = None
-        best_score = -float('inf')
-        for move in self.available_moves():
-            self.board[move] = 'O'
-            score = self.minimax(0, False)
-            self.board[move] = ' '
-            if score > best_score:
-                best_score = score
-                best_move = move
-        return best_move
-
-    # Get AI move based on difficulty
-    def get_ai_move(self):
-        if self.difficulty == 'Easy':
-            return self.easy_ai_move()
-        elif self.difficulty == 'Medium':
-            return self.medium_ai_move()
-        elif self.difficulty == 'Hard':
-            return self.hard_ai_move()
-
-    # Make a move
-    def make_move(self, position, player):
-        if self.board[position] == ' ':
-            self.board[position] = player
+# Check for a win
+def check_winner(board, player):
+    win_patterns = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Horizontal
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Vertical
+        [0, 4, 8], [2, 4, 6]              # Diagonal
+    ]
+    for pattern in win_patterns:
+        if all(board[i] == player for i in pattern):
             return True
-        return False
+    return False
 
-    # Switch player
-    def switch_player(self):
-        self.current_player = 'O' if self.current_player == 'X' else 'X'
+# Check for a draw
+def check_draw(board):
+    return all(cell != ' ' for cell in board)
 
+# Get available moves
+def available_moves(board):
+    return [i for i, cell in enumerate(board) if cell == ' ']
+
+# Easy AI move (random)
+def easy_ai_move(board):
+    return random.choice(available_moves(board))
+
+# Medium AI move (block player's win)
+def medium_ai_move(board):
+    for move in available_moves(board):
+        board[move] = 'O'
+        if check_winner(board, 'O'):
+            board[move] = ' '
+            return move
+        board[move] = ' '
+    for move in available_moves(board):
+        board[move] = 'X'
+        if check_winner(board, 'X'):
+            board[move] = ' '
+            return move
+        board[move] = ' '
+    return easy_ai_move(board)
+
+# Hard AI move (minimax algorithm)
+def minimax(board, depth, is_maximizing):
+    if check_winner(board, 'O'):
+        return 10 - depth
+    if check_winner(board, 'X'):
+        return depth - 10
+    if check_draw(board):
+        return 0
+
+    if is_maximizing:
+        best_score = -float('inf')
+        for move in available_moves(board):
+            board[move] = 'O'
+            score = minimax(board, depth + 1, False)
+            board[move] = ' '
+            best_score = max(score, best_score)
+        return best_score
+    else:
+        best_score = float('inf')
+        for move in available_moves(board):
+            board[move] = 'X'
+            score = minimax(board, depth + 1, True)
+            board[move] = ' '
+            best_score = min(score, best_score)
+        return best_score
+
+def hard_ai_move(board):
+    best_move = None
+    best_score = -float('inf')
+    for move in available_moves(board):
+        board[move] = 'O'
+        score = minimax(board, 0, False)
+        board[move] = ' '
+        if score > best_score:
+            best_score = score
+            best_move = move
+    return best_move
+
+# Get AI move based on difficulty
+def get_ai_move(board, difficulty):
+    if difficulty == 'Easy':
+        return easy_ai_move(board)
+    elif difficulty == 'Medium':
+        return medium_ai_move(board)
+    elif difficulty == 'Hard':
+        return hard_ai_move(board)
 
 # Display home screen and select difficulty
 def select_difficulty():
@@ -141,53 +120,55 @@ def select_difficulty():
 
 # Main game loop
 def play_game():
-    game_count = 0
+    difficulty = select_difficulty()
+    player_starts = True
     player_score = 0
     ai_score = 0
-    difficulty = select_difficulty()
 
     while True:
-        game = TicTacToe(difficulty, game_count, player_score, ai_score)
-        while True:
-            game.print_board()
+        board = initialize_board()
+        current_player = 'X' if player_starts else 'O'
+        print(f"\n{'Player' if player_starts else 'AI'} starts the game!")
 
-            if game.current_player == 'X':  # Human's turn
+        while True:
+            print_board(board)
+            if current_player == 'X':  # Human's turn
                 move = int(input("Enter your move (1-9): ")) - 1
-                if game.make_move(move, 'X'):
-                    if game.check_winner('X'):
-                        game.print_board()
+                if board[move] == ' ':
+                    board[move] = 'X'
+                    if check_winner(board, 'X'):
+                        print_board(board)
                         print("Congratulations! You win!")
-                        player_score += 1  # Increment player score
+                        player_score += 1
                         break
-                    game.switch_player()
+                    current_player = 'O'
                 else:
                     print("Invalid move. Try again.")
             else:  # AI's turn
-                move = game.get_ai_move()
-                game.make_move(move, 'O')
-                if game.check_winner('O'):
-                    game.print_board()
+                move = get_ai_move(board, difficulty)
+                board[move] = 'O'
+                print("AI chose:", move + 1)
+                if check_winner(board, 'O'):
+                    print_board(board)
                     print("AI wins!")
-                    ai_score += 1  # Increment AI score
+                    ai_score += 1
                     break
-                game.switch_player()
+                current_player = 'X'
 
-            if game.check_draw():
-                game.print_board()
+            if check_draw(board):
+                print_board(board)
                 print("It's a draw!")
                 break
 
-        # Display updated scores
-        print(f"Score -> You: {player_score} | AI: {ai_score}")
+        print(f"Score: You {player_score} - AI {ai_score}")
 
-        game_count += 1
-        play_again = input("Do you want to play again? (y/n): ")
+        # Alternate who starts the game next
+        player_starts = not player_starts
+
+        # Option to restart or quit
+        play_again = input("Play again? (y/n): ")
         if play_again.lower() != 'y':
             break
-
-    # Show final scores
-    print(f"Final Score -> You: {player_score} | AI: {ai_score}")
-    print("Thank you for playing!")
 
 if __name__ == "__main__":
     play_game()
