@@ -4,91 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tic-Tac-Toe Game</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background: #f0f0f0;
-        }
-
-        .container {
-            text-align: center;
-        }
-
-        .board {
-            display: grid;
-            grid-template-columns: repeat(3, 100px);
-            grid-template-rows: repeat(3, 100px);
-            gap: 10px;
-            margin: 20px auto;
-        }
-
-        .cell {
-            background: #fff;
-            border: 2px solid #ccc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2rem;
-            cursor: pointer;
-            transition: transform 0.3s ease, background 0.3s ease;
-        }
-
-        .cell:hover {
-            background: #e0e0e0;
-            transform: scale(1.1);
-        }
-
-        .hidden {
-            visibility: hidden;
-        }
-
-        .message {
-            font-size: 1.5rem;
-            margin-top: 20px;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .message.visible {
-            opacity: 1;
-        }
-
-        .scoreboard {
-            display: flex;
-            justify-content: space-between;
-            margin: 10px auto;
-            width: 220px;
-        }
-
-        .score {
-            font-size: 1.2rem;
-        }
-
-        .button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 1rem;
-            cursor: pointer;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            transition: background 0.3s ease;
-        }
-
-        .button:hover {
-            background: #0056b3;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<div class="container">
+<div id="startScreen" class="screen">
+    <h1>Welcome to Tic-Tac-Toe!</h1>
+    <button id="startButton" class="button">Start Game</button>
+</div>
+
+<div id="gameScreen" class="container hidden">
     <div class="scoreboard">
         <div class="score" id="playerScore">You: 0</div>
         <div class="score" id="aiScore">AI: 0</div>
@@ -108,117 +33,6 @@
     <button class="button" id="restartButton">Restart Game</button>
 </div>
 
-<script>
-    let board = ['', '', '', '', '', '', '', '', ''];
-    let currentPlayer = 'X';
-    let gameCount = 0;
-    let playerScore = 0;
-    let aiScore = 0;
-    let isGameOver = false;
-    const cells = document.querySelectorAll('.cell');
-    const messageElement = document.getElementById('message');
-    const playerScoreElement = document.getElementById('playerScore');
-    const aiScoreElement = document.getElementById('aiScore');
-    const restartButton = document.getElementById('restartButton');
-
-    function checkWinner() {
-        const winPatterns = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Horizontal
-            [0, 3, 6], [1, 4, 7], [2, 5, 8]  // Vertical
-            [0, 4, 8], [2, 4, 6]             // Diagonal
-        ];
-
-        for (let pattern of winPatterns) {
-            const [a, b, c] = pattern;
-            if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-                return board[a];
-            }
-        }
-
-        return board.includes('') ? null : 'Draw';
-    }
-
-    function displayMessage(text) {
-        messageElement.textContent = text;
-        messageElement.classList.remove('hidden');
-        messageElement.classList.add('visible');
-    }
-
-    function updateScore() {
-        playerScoreElement.textContent = `You: ${playerScore}`;
-        aiScoreElement.textContent = `AI: ${aiScore}`;
-    }
-
-    function handleCellClick(event) {
-        const index = event.target.getAttribute('data-index');
-        if (board[index] !== '' || isGameOver) return;
-
-        board[index] = currentPlayer;
-        event.target.textContent = currentPlayer;
-        event.target.style.transform = 'scale(1.2)';
-        setTimeout(() => event.target.style.transform = 'scale(1)', 100);
-
-        const winner = checkWinner();
-        if (winner) {
-            isGameOver = true;
-            if (winner === 'X') {
-                playerScore++;
-                displayMessage('Congratulations! You win!');
-            } else if (winner === 'O') {
-                aiScore++;
-                displayMessage('AI wins!');
-            } else {
-                displayMessage("It's a draw!");
-            }
-            updateScore();
-        } else {
-            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-            if (currentPlayer === 'O') aiMove();
-        }
-    }
-
-    function aiMove() {
-        const availableMoves = board.map((cell, index) => cell === '' ? index : null).filter(index => index !== null);
-        const move = availableMoves[Math.floor(Math.random() * availableMoves.length)];
-        board[move] = 'O';
-        cells[move].textContent = 'O';
-        cells[move].style.transform = 'scale(1.2)';
-        setTimeout(() => cells[move].style.transform = 'scale(1)', 100);
-
-        const winner = checkWinner();
-        if (winner) {
-            isGameOver = true;
-            if (winner === 'O') {
-                aiScore++;
-                displayMessage('AI wins!');
-            } else {
-                displayMessage("It's a draw!");
-            }
-            updateScore();
-        } else {
-            currentPlayer = 'X';
-        }
-    }
-
-    function restartGame() {
-        board = ['', '', '', '', '', '', '', '', ''];
-        isGameOver = false;
-        currentPlayer = gameCount % 2 === 0 ? 'X' : 'O';
-        cells.forEach(cell => {
-            cell.textContent = '';
-            cell.style.transform = 'scale(1)';
-        });
-        messageElement.classList.add('hidden');
-        messageElement.classList.remove('visible');
-
-        gameCount++;
-        if (currentPlayer === 'O') aiMove();
-    }
-
-    cells.forEach(cell => cell.addEventListener('click', handleCellClick));
-    restartButton.addEventListener('click', restartGame);
-    restartGame(); // Start the first game
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
